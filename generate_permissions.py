@@ -1,6 +1,6 @@
 from auth.models import Permission
 
-def generate_permissions(session, models):
+def generate_model_level_permissions(session, models):
     permissions = []
     actions = ["CREATE", "READ", "UPDATE", "DELETE"]
 
@@ -8,8 +8,8 @@ def generate_permissions(session, models):
         for action in actions:
             permissions.append(
                 {
-                    "name": f"{action}_{model.__name__.upper()}",
-                    "description": f"Allows the user to {action.lower()} {model.__name__.lower()} recprds",
+                    "name": f"{action}_{model.upper()}",
+                    "description": f"Allows the user to {action.lower()} {model.lower()} recprds",
                 }
             )
     session.execute(Permission.__table__.insert(), permissions)

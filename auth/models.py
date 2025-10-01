@@ -1,5 +1,5 @@
 from database import BaseModel
-from sqlalchemy import String, ForeignKey, Integer, Boolean, DateTime, Table, Column
+from sqlalchemy import String, ForeignKey, Integer, Boolean, DateTime, Table, Column, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from datetime import datetime
@@ -48,7 +48,7 @@ class Permission(BaseModel):
     id: Mapped[int] = mapped_column(Integer, primary_key = True)
 
     name: Mapped[str] = mapped_column(String, nullable = False)
-    description: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
 
     users: Mapped[list["User"]] = relationship("User", secondary = user_permissions, back_populates="permissions")
     roles: Mapped[list["Role"]] = relationship("Role", secondary = role_permissions, back_populates="permissions")
@@ -60,7 +60,7 @@ class Role(BaseModel):
     id: Mapped[int] = mapped_column(Integer, primary_key = True)
 
     name: Mapped[str] = mapped_column(String, unique = True, nullable = False)
-    description: Mapped[str] = mapped_column(String, nullable = False)
+    description: Mapped[str] = mapped_column(Text, nullable = False)
 
     users: Mapped[list["User"]] = relationship("User", secondary = user_roles, back_populates="roles")
     permissions: Mapped[list["Permission"]] = relationship("Permission", secondary = role_permissions, back_populates="roles")
