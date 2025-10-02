@@ -29,3 +29,11 @@ class ContentVersionSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+class ContentVersionUpdateSchema(BaseModel):
+    version: Optional[int] = None
+    locale: Optional[str] = None
+    title: Optional[str] = None
+    body_md: Optional[str] = None
+    changelog: Optional[str] = None
+    status: Optional[str] = None

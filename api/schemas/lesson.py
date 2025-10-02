@@ -21,3 +21,9 @@ class LessonSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+class LessonUpdateSchema(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    order_index: Optional[int] = None
+    category_id: Optional[int] = None

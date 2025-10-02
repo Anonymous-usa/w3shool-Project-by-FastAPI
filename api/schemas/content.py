@@ -25,3 +25,10 @@ class ContentSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+class ContentUpdateSchema(BaseModel):
+    slug: Optional[str] = None
+    default_locale: Optional[str] = None
+    tags: Optional[List[str]] = None
+    is_published: Optional[bool] = None
+    category_id: Optional[int] = None

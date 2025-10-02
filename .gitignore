@@ -1,2 +1,3 @@
 .venv
 w3school_db.db
+.env

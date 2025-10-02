@@ -19,3 +19,9 @@ class QuizSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+class QuizUpdateSchema(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    questions: Optional[List[dict]] = None
+    lesson_id: Optional[int] = None

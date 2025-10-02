@@ -1,6 +1,6 @@
 import uvicorn
 
-
+from routers import app
 
 
 if __name__ == "__main__":

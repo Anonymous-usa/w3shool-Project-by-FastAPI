@@ -21,3 +21,10 @@ class ExampleSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+class ExampleUpdateSchema(BaseModel):
+    language: Optional[str] = None
+    title: Optional[str] = None
+    code: Optional[str] = None
+    runnable: Optional[bool] = None
+    content_id: Optional[int] = None
