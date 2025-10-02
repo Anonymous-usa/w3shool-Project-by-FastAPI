@@ -74,3 +74,12 @@ class BlackListToken(BaseModel):
     token: Mapped[str] = mapped_column(String, nullable = False)
 
 
+class EmailVerification(BaseModel):
+    __tablename__ = "email_verifications"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    code: Mapped[str] = mapped_column(String(6), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now() + timedelta(minutes=10))
+
+    user: Mapped["User"] = relationship("User")
