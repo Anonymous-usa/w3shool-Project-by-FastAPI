@@ -5,9 +5,9 @@ from api.models.lessons import Lesson
 from api.schemas.lesson import LessonCreateSchema, LessonUpdateSchema, LessonSchema
 from permissions import has_permission
 
-router = APIRouter(prefix="/lesson", tags=["Lesson endpoints"])
+lesson_router = APIRouter(prefix="/lesson", tags=["Lesson endpoints"])
 
-@router.post("/create", response_model=LessonSchema, status_code=201, summary="Create a new lesson", dependencies=[Depends(has_permission("CREATE_LESSONS"))])
+@lesson_router.post("/create", response_model=LessonSchema, status_code=201, summary="Create a new lesson", dependencies=[Depends(has_permission("CREATE_LESSONS"))])
 def create_lesson(data: LessonCreateSchema, db: Session = Depends(get_db)):
     lesson = Lesson(
         category_id=data.category_id,
@@ -20,7 +20,7 @@ def create_lesson(data: LessonCreateSchema, db: Session = Depends(get_db)):
     db.refresh(lesson)
     return lesson
 
-@router.put("/update/{id}", response_model=LessonSchema, summary="Update a lesson by ID", dependencies=[Depends(has_permission("UPDATE_LESSONS"))])
+@lesson_router.put("/update/{id}", response_model=LessonSchema, summary="Update a lesson by ID", dependencies=[Depends(has_permission("UPDATE_LESSONS"))])
 def update_lesson(id: int, data: LessonUpdateSchema, db: Session = Depends(get_db)):
     lesson = db.query(Lesson).filter(Lesson.id == id).first()
     if not lesson:
@@ -39,7 +39,7 @@ def update_lesson(id: int, data: LessonUpdateSchema, db: Session = Depends(get_d
     db.refresh(lesson)
     return lesson
 
-@router.delete("/delete/{id}", status_code=204, summary="Delete a lesson by ID", dependencies=[Depends(has_permission("DELETE_LESSONS"))])
+@lesson_router.delete("/delete/{id}", status_code=204, summary="Delete a lesson by ID", dependencies=[Depends(has_permission("DELETE_LESSONS"))])
 def delete_lesson(id: int, db: Session = Depends(get_db)):
     lesson = db.query(Lesson).filter(Lesson.id == id).first()
     if not lesson:
@@ -48,14 +48,14 @@ def delete_lesson(id: int, db: Session = Depends(get_db)):
     db.commit()
     return
 
-@router.get("/get-all", response_model=list[LessonSchema], summary="Get all lessons", dependencies=[Depends(has_permission("READ_LESSONS"))])
+@lesson_router.get("/get-all", response_model=list[LessonSchema], summary="Get all lessons", dependencies=[Depends(has_permission("READ_LESSONS"))])
 def get_all_lessons(db: Session = Depends(get_db)):
     return db.query(Lesson).options(
         joinedload(Lesson.category),
         joinedload(Lesson.quizzes)
     ).all()
 
-@router.get("/{id}", response_model=LessonSchema, summary="Get a lesson by ID", dependencies=[Depends(has_permission("READ_LESSONS"))])
+@lesson_router.get("/{id}", response_model=LessonSchema, summary="Get a lesson by ID", dependencies=[Depends(has_permission("READ_LESSONS"))])
 def get_lesson_by_id(id: int, db: Session = Depends(get_db)):
     lesson = db.query(Lesson).options(
         joinedload(Lesson.category),

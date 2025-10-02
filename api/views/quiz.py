@@ -5,9 +5,9 @@ from api.models.quiz import Quiz
 from api.schemas.quiz import QuizCreateSchema, QuizUpdateSchema, QuizSchema
 from permissions import has_permission
 
-router = APIRouter(prefix="/quiz", tags=["Quiz endpoints"])
+quiz_router = APIRouter(prefix="/quiz", tags=["Quiz endpoints"])
 
-@router.post("/create", response_model=QuizSchema, status_code=201, summary="Create a new quiz", dependencies=[Depends(has_permission("CREATE_QUIZ"))])
+@quiz_router.post("/create", response_model=QuizSchema, status_code=201, summary="Create a new quiz", dependencies=[Depends(has_permission("CREATE_QUIZ"))])
 def create_quiz(data: QuizCreateSchema, db: Session = Depends(get_db)):
     quiz = Quiz(
         lesson_id=data.lesson_id,
@@ -20,7 +20,7 @@ def create_quiz(data: QuizCreateSchema, db: Session = Depends(get_db)):
     db.refresh(quiz)
     return quiz
 
-@router.put("/update/{id}", response_model=QuizSchema, summary="Update a quiz by ID", dependencies=[Depends(has_permission("UPDATE_QUIZ"))])
+@quiz_router.put("/update/{id}", response_model=QuizSchema, summary="Update a quiz by ID", dependencies=[Depends(has_permission("UPDATE_QUIZ"))])
 def update_quiz(id: int, data: QuizUpdateSchema, db: Session = Depends(get_db)):
     quiz = db.query(Quiz).filter(Quiz.id == id).first()
     if not quiz:
@@ -39,7 +39,7 @@ def update_quiz(id: int, data: QuizUpdateSchema, db: Session = Depends(get_db)):
     db.refresh(quiz)
     return quiz
 
-@router.delete("/delete/{id}", status_code=204, summary="Delete a quiz by ID", dependencies=[Depends(has_permission("DELETE_QUIZ"))])
+@quiz_router.delete("/delete/{id}", status_code=204, summary="Delete a quiz by ID", dependencies=[Depends(has_permission("DELETE_QUIZ"))])
 def delete_quiz(id: int, db: Session = Depends(get_db)):
     quiz = db.query(Quiz).filter(Quiz.id == id).first()
     if not quiz:
@@ -48,11 +48,11 @@ def delete_quiz(id: int, db: Session = Depends(get_db)):
     db.commit()
     return
 
-@router.get("/get-all", response_model=list[QuizSchema], summary="Get all quizzes", dependencies=[Depends(has_permission("READ_QUIZ"))])
+@quiz_router.get("/get-all", response_model=list[QuizSchema], summary="Get all quizzes", dependencies=[Depends(has_permission("READ_QUIZ"))])
 def get_all_quizzes(db: Session = Depends(get_db)):
     return db.query(Quiz).options(joinedload(Quiz.lesson)).all()
 
-@router.get("/{id}", response_model=QuizSchema, summary="Get a quiz by ID", dependencies=[Depends(has_permission("READ_QUIZ"))])
+@quiz_router.get("/{id}", response_model=QuizSchema, summary="Get a quiz by ID", dependencies=[Depends(has_permission("READ_QUIZ"))])
 def get_quiz_by_id(id: int, db: Session = Depends(get_db)):
     quiz = db.query(Quiz).options(joinedload(Quiz.lesson)).filter(Quiz.id == id).first()
     if not quiz:

@@ -5,9 +5,9 @@ from api.models.content import Content
 from api.schemas.content import ContentCreateSchema, ContentUpdateSchema, ContentSchema
 from permissions import has_permission
 
-router = APIRouter(prefix="/content", tags=["Content endpoints"])
+content_router = APIRouter(prefix="/content", tags=["Content endpoints"])
 
-@router.post("/create", response_model=ContentSchema, status_code=201, summary="Create new content", dependencies=[Depends(has_permission("CREATE_CONTENT"))])
+@content_router.post("/create", response_model=ContentSchema, status_code=201, summary="Create new content", dependencies=[Depends(has_permission("CREATE_CONTENT"))])
 def create_content(data: ContentCreateSchema, db: Session = Depends(get_db)):
     content = Content(
         category_id=data.category_id,
@@ -21,7 +21,7 @@ def create_content(data: ContentCreateSchema, db: Session = Depends(get_db)):
     db.refresh(content)
     return content
 
-@router.put("/update/{id}", response_model=ContentSchema, summary="Update content by ID", dependencies=[Depends(has_permission("UPDATE_CONTENT"))])
+@content_router.put("/update/{id}", response_model=ContentSchema, summary="Update content by ID", dependencies=[Depends(has_permission("UPDATE_CONTENT"))])
 def update_content(id: int, data: ContentUpdateSchema, db: Session = Depends(get_db)):
     content = db.query(Content).filter(Content.id == id).first()
     if not content:
@@ -42,7 +42,7 @@ def update_content(id: int, data: ContentUpdateSchema, db: Session = Depends(get
     db.refresh(content)
     return content
 
-@router.delete("/delete/{id}", status_code=204, summary="Delete content by ID", dependencies=[Depends(has_permission("DELETE_CONTENT"))])
+@content_router.delete("/delete/{id}", status_code=204, summary="Delete content by ID", dependencies=[Depends(has_permission("DELETE_CONTENT"))])
 def delete_content(id: int, db: Session = Depends(get_db)):
     content = db.query(Content).filter(Content.id == id).first()
     if not content:
@@ -51,7 +51,7 @@ def delete_content(id: int, db: Session = Depends(get_db)):
     db.commit()
     return
 
-@router.get("/get-all", response_model=list[ContentSchema], summary="Get all content", dependencies=[Depends(has_permission("READ_CONTENT"))])
+@content_router.get("/get-all", response_model=list[ContentSchema], summary="Get all content", dependencies=[Depends(has_permission("READ_CONTENT"))])
 def get_all_content(db: Session = Depends(get_db)):
     return db.query(Content).options(
         joinedload(Content.category),
@@ -59,7 +59,7 @@ def get_all_content(db: Session = Depends(get_db)):
         joinedload(Content.examples)
     ).all()
 
-@router.get("/{id}", response_model=ContentSchema, summary="Get content by ID", dependencies=[Depends(has_permission("READ_CONTENT"))])
+@content_router.get("/{id}", response_model=ContentSchema, summary="Get content by ID", dependencies=[Depends(has_permission("READ_CONTENT"))])
 def get_content_by_id(id: int, db: Session = Depends(get_db)):
     content = db.query(Content).options(
         joinedload(Content.category),
