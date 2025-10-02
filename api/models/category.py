@@ -10,7 +10,7 @@ class Category(BaseModel):
 
     parent_id: Mapped[int | None] = mapped_column(ForeignKey("categories.id"), nullable=True)
     
-    slug: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    slug: Mapped[str] = mapped_column(String(128), unique=True, nullable=False, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str ] = mapped_column(Text)
 

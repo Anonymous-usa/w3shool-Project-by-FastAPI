@@ -8,7 +8,7 @@ class Content(BaseModel):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
-    slug: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
+    slug: Mapped[str] = mapped_column(String(128), unique=True, nullable=False, index=True)
     default_locale: Mapped[str] = mapped_column(String(8), default="en")
     tags: Mapped[list[dict] | None] = mapped_column(JSON)
     is_published: Mapped[bool] = mapped_column(Boolean, default=False)

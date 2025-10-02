@@ -1,48 +1,53 @@
-from pydantic import BaseModel, EmailStr, model_validator
-from typing import List, Optional
+from pydantic import BaseModel, EmailStr, Field, model_validator
+from typing import List, Optional, Annotated
 from datetime import datetime
 
 
+from validators import *
+
+
 class UserLoginSchema(BaseModel):
-    email: EmailStr 
-    password: str
+    email: EmailStr
+    password: PasswordStr
 
 
 class UserRegistrationSchema(UserLoginSchema):
-    confirm_password: str
+    confirm_password: PasswordStr
 
     @model_validator(mode="before")
     def validate_password(cls, values):
-        if values["password"] != values["confirm_password"]:
+        if values.get("password") != values.get("confirm_password"):
             raise ValueError("Passwords don't match!")
         return values
 
 
 class UserCreateSchema(BaseModel):
     email: EmailStr
-    password: str
-    is_active: Optional[bool] = False
-    roles: Optional[List[int]] = None
-    permissions: Optional[List[int]] = None
+    password: PasswordStr
+    is_active: bool = False
+    roles: Optional[Annotated[List[int], Field(min_length=1)]] = None
+    permissions: Optional[Annotated[List[int], Field(min_length=1)]] = None
 
 
 class PermissionSchema(BaseModel):
     id: int
-    name: str
-    description: str
+    name: NameStr
+    description: DescriptionStr_auth
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 
 class RoleSchema(BaseModel):
     id: int
-    name: str
-    description: str
+    name: NameStr
+    description: DescriptionStr_auth
     permissions: List[PermissionSchema]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 
 class UserSchema(BaseModel):
@@ -54,14 +59,17 @@ class UserSchema(BaseModel):
     permissions: List[PermissionSchema]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
 
 class PermissionCreateSchema(BaseModel):
-    name: str
-    description: str
+    name: NameStr
+    description: DescriptionStr_auth
 
 
 class RoleCreateSchema(BaseModel):
-    name: str
-    description: str
-    permissions: List[int]  
+    name: NameStr
+    description: DescriptionStr_auth
+    permissions: Annotated[List[int], Field(min_length=1)]
+

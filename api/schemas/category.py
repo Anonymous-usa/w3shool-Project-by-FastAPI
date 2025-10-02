@@ -1,32 +1,39 @@
-from pydantic import BaseModel
-from typing import Optional, List
+from pydantic import BaseModel, Field
+from typing import Optional, List, Annotated, TYPE_CHECKING
+from validators import *
 
-from api.schemas.content import ContentSchema
-from api.schemas.lesson import LessonSchema
+if TYPE_CHECKING:
+    from api.schemas.content import ContentSchema
+    from api.schemas.lesson import LessonSchema
 
 
 class CategoryCreateSchema(BaseModel):
-    title: str
-    description: Optional[str] = None
-    slug: str
+    title: TitleStr
+    description: Optional[Annotated[str, Field(max_length=500)]] = None
+    slug: SlugStr
+
 
 class CategoryUpdateSchema(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    slug: Optional[str] = None
+    title: Optional[TitleStr] = None
+    description: Optional[Annotated[str, Field(max_length=500)]] = None
+    slug: Optional[SlugStr] = None
+
 
 class CategorySchema(BaseModel):
     id: int
-    title: str
+    title: TitleStr
     description: Optional[str]
-    slug: str
+    slug: SlugStr
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CategoryWithRelationsSchema(CategorySchema):
-    content: List[ContentSchema]
-    lessons: List[LessonSchema]
-    children: List[CategorySchema]
-    parent: Optional[CategorySchema]
+    content: List["ContentSchema"]
+    lessons: List["LessonSchema"]
+    children: List["CategorySchema"]
+    parent: Optional["CategorySchema"]
+
+
+

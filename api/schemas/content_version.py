@@ -1,39 +1,43 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
+from typing import Optional, Literal, Annotated
 from datetime import datetime
 from auth.schemas import UserSchema
 
 
+from validators import *
+
 
 class ContentVersionCreateSchema(BaseModel):
-    content_id: int
-    version: int
-    locale: str
-    title: str
-    body_md: str
-    changelog: Optional[str] = None
-    status: Optional[str] = "draft"
-    created_by: Optional[int] = None
+    content_id: Annotated[int, Field(gt=0)]
+    version: Annotated[int, Field(ge=1, description="Номер версии, начиная с 1")]
+    locale: LocaleStr
+    title: TitleStr
+    body_md: BodyStr
+    changelog: Optional[ChangelogStr] = None
+    status: Literal["draft", "published", "archived"] = "draft"
+    created_by: Optional[int] = Field(None, description="ID пользователя-автора")
 
 
 class ContentVersionSchema(BaseModel):
     id: int
-    version: int
-    locale: str
-    title: str
-    body_md: str
+    version: Annotated[int, Field(ge=1)]
+    locale: LocaleStr
+    title: TitleStr
+    body_md: BodyStr
     changelog: Optional[str]
-    status: str
+    status: Literal["draft", "published", "archived"]
     created_at: datetime
     author: Optional[UserSchema]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
 
 class ContentVersionUpdateSchema(BaseModel):
-    version: Optional[int] = None
-    locale: Optional[str] = None
-    title: Optional[str] = None
-    body_md: Optional[str] = None
-    changelog: Optional[str] = None
-    status: Optional[str] = None
+    version: Optional[Annotated[int, Field(ge=1)]] = None
+    locale: Optional[LocaleStr] = None
+    title: Optional[TitleStr] = None
+    body_md: Optional[BodyStr] = None
+    changelog: Optional[ChangelogStr] = None
+    status: Optional[Literal["draft", "published", "archived"]] = None

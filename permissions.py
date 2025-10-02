@@ -9,7 +9,7 @@ def has_permission(permission):
             for perm in role.permissions:
                 user_permissions.append(perm.name)
         if permission not in user_permissions:
-            raise ValueError("Access denied!")
+            raise HTTPException(status_code=403, detail="Access denied")
         return True
     return checker
 
