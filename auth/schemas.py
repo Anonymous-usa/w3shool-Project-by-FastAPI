@@ -22,11 +22,12 @@ class UserRegistrationSchema(UserLoginSchema):
 
 
 class UserCreateSchema(BaseModel):
-    email: EmailStr
-    password: PasswordStr
-    is_active: bool = False
-    roles: Optional[Annotated[List[int], Field(min_length=1)]] = None
-    permissions: Optional[Annotated[List[int], Field(min_length=1)]] = None
+    email: EmailStr = Field(..., title="Email пользователя")
+    password: PasswordStr = Field(..., title="Пароль")
+    is_active: bool = Field(False, title="Активен ли пользователь")
+    roles: Optional[List[int]] = Field(default=None, title="ID ролей")
+    permissions: Optional[List[int]] = Field(default=None, title="ID прав")
+
 
 
 class PermissionSchema(BaseModel):

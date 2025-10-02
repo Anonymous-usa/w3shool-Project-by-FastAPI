@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
 from auth.schemas import *
-from auth.models import User, BlackListToken, EmailVerification, Role
+from auth.models import User, BlackListToken, EmailVerification, Role, Permission
 from auth.utils import *
 from fastapi.responses import JSONResponse
 from permissions import has_permission
@@ -28,7 +28,7 @@ def login(data: UserLoginSchema, db: Session = Depends(get_db)):
     "/register",
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
-    response_model=dict  # можно заменить на отдельную Pydantic‑схему
+    response_model=dict  
 )
 def register(data: UserRegistrationSchema, db: Session = Depends(get_db)):
    
@@ -125,3 +125,79 @@ async def create_role(role_data: RoleCreateSchema, db:Session = Depends(get_db))
     db.commit()
     db.refresh(role)
     return {"message": "Role added successfully!"}
+
+
+@auth_router.post("/admin/create-user", response_model=UserSchema, summary="Admin: create user with roles and permissions")
+def admin_create_user(
+    data: UserCreateSchema,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    
+    if not has_permission(current_user, "manage_users"):
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    
+    existing = db.query(User).filter(User.email == data.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    
+    user = User(
+        email=data.email,
+        password_hash=hash_password(data.password),
+        is_active=data.is_active
+    )
+
+    
+    if data.roles:
+        roles = db.query(Role).filter(Role.id.in_(data.roles)).all()
+        user.roles.extend(roles)
+
+    
+    if data.permissions:
+        perms = db.query(Permission).filter(Permission.id.in_(data.permissions)).all()
+        user.permissions.extend(perms)
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+@auth_router.get("/admin/roles", response_model=List[RoleSchema])
+def list_roles(db: Session = Depends(get_db), _: bool = Depends(has_permission("MANAGE_USERS"))):
+    roles = db.query(Role).all()
+    return roles
+@auth_router.get("/admin/permissions", response_model=List[PermissionSchema], summary="Список всех прав")
+def list_permissions(db: Session = Depends(get_db), _: bool = Depends(has_permission("READ_PERMISSIONS"))):
+    return db.query(Permission).all()
+
+
+@auth_router.post(
+    "/admin/create-permission",
+    response_model=PermissionSchema,
+    status_code=status.HTTP_201_CREATED,
+    summary="Admin: create new permission"
+)
+def create_permission(
+    data: PermissionCreateSchema,
+    db: Session = Depends(get_db),
+    _: bool = Depends(has_permission("CREATE_PERMISSIONS"))
+):
+   
+    if not data.name.strip() or not data.description.strip():
+        raise HTTPException(status_code=400, detail="Name and description are required")
+
+    
+    existing = db.query(Permission).filter(Permission.name == data.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Permission with this name already exists")
+
+    
+    new_permission = Permission(name=data.name, description=data.description)
+    db.add(new_permission)
+    db.commit()
+    db.refresh(new_permission)
+
+    return new_permission
